@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Jayakrishna M - Certifications</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            padding-top: 4.5rem;
+            color: #212529;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .navbar {
+            background-color: #343a40 !important;
+            padding: 1rem;
+            min-height: 4rem;
+        }
+        .nav-link {
+            color: rgba(255,255,255,.75) !important;
+            padding: .75rem 1.25rem !important;
+            font-size: 0.9rem;
+            letter-spacing: 0.3px;
+        }
+        .nav-link:hover {
+            color: rgba(255,255,255,.9) !important;
+        }
+        .container {
+            max-width: 800px;
+            padding: 0 15px;
+            margin-top: 1rem;
+        }
+        h2 {
+            font-size: 2rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top">
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Certifications</h2>
+        <div id="certification-content">
+            Loading certifications...
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.18/mammoth.browser.min.js"></script>
+    <script>
+        async function loadCertifications() {
+            const container = document.getElementById('certification-content');
+            try {
+                const res = await fetch('images/files/Jayakrishna-java.docx');
+                if (!res.ok) throw new Error('Resume not found');
+                const arrayBuffer = await res.arrayBuffer();
+                const result = await window.mammoth.convertToHtml({arrayBuffer: arrayBuffer});
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(result.value, 'text/html');
+
+                const headings = Array.from(doc.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+                let found = false;
+                for (const h of headings) {
+                    if (/cert/i.test(h.textContent || '')) {
+                        found = true;
+                        let html = '<div class="certifications">';
+                        let el = h.nextSibling;
+                        while (el && !(el.nodeType===1 && /^H[1-6]$/.test(el.tagName))) {
+                            if (el.nodeType===1) html += el.outerHTML;
+                            el = el.nextSibling;
+                        }
+                        html += '</div>';
+                        container.innerHTML = html;
+                        break;
+                    }
+                }
+                if (!found) {
+                    container.innerHTML = 'No certifications found in the resume.';
+                }
+            } catch (err) {
+                container.innerHTML = 'Could not load certifications: ' + (err.message || err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadCertifications);
+    </script>
+</body>
+</html>
